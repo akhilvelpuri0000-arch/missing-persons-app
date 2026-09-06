@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Missing Persons Registry</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0F3D3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Find">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --teal:#0F3D3E; --teal-dark:#0A2C2D; --sand:#F7F3EC; --white:#FFFFFF;
+    --slate:#5B6B6C; --amber:#C97A2B; --line:#E4DFD3; --red:#B94A3B; --green:#3F7A52;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Telugu",sans-serif;background:var(--sand);color:var(--teal-dark);display:flex;justify-content:center;}
+  #app{width:100%;max-width:400px;min-height:100vh;background:var(--white);display:flex;flex-direction:column;position:relative;}
+  header{background:var(--teal);color:var(--white);padding:22px 20px 20px;position:relative;}
+  header .eyebrow{font-size:13px;opacity:.75;margin-bottom:4px;}
+  header h1{margin:0;font-size:21px;font-weight:600;padding-right:60px;}
+  header p{margin:6px 0 0;font-size:13.5px;opacity:.85;line-height:1.5;}
+  .lang-toggle{position:absolute;top:20px;right:16px;display:flex;background:rgba(255,255,255,.15);border-radius:16px;overflow:hidden;font-size:11px;}
+  .lang-toggle span{padding:5px 10px;cursor:pointer;}
+  .lang-toggle span.active{background:rgba(255,255,255,.35);font-weight:700;}
+  .cta-row{display:flex;gap:10px;padding:20px 20px 6px;}
+  .search-box{margin:16px 20px 0;position:relative;}
+  .search-box input{width:100%;padding:11px 14px 11px 36px;border:1px solid var(--line);border-radius:20px;font-size:13.5px;font-family:inherit;background:#FBF9F4;color:var(--teal-dark);}
+  .search-box .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--slate);}
+  .cta{flex:1;border-radius:10px;padding:14px;cursor:pointer;}
+  .cta.report{background:#FDF7F3;border:1px solid #EAD2C8;}
+  .cta.sight{background:#EEF4EF;border:1px solid #D3E3D6;}
+  .cta .t1{font-size:13px;font-weight:700;}
+  .cta.report .t1{color:var(--amber);}
+  .cta.sight .t1{color:var(--green);}
+  .cta .t2{font-size:11px;color:var(--slate);margin-top:2px;}
+  .section{padding:20px;}
+  .case-card{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;}
+  .ph{width:48px;height:48px;border-radius:8px;background:#DDD5C2;flex-shrink:0;}
+  .case-body{flex:1;}
+  .case-body h4{margin:0;font-size:13.5px;}
+  .case-body .meta{font-size:11.5px;color:var(--slate);margin-top:3px;}
+  .note{margin:4px 20px 20px;background:#EEF4EF;border:1px solid #D3E3D6;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--slate);line-height:1.55;}
+  nav{position:sticky;bottom:0;background:var(--white);border-top:1px solid var(--line);display:flex;max-width:400px;}
+  nav .tab{flex:1;text-align:center;padding:11px 0 9px;font-size:11px;color:var(--slate);cursor:pointer;}
+  nav .tab.active{color:var(--teal);font-weight:600;}
+  form{padding:20px;}
+  .group-title{font-size:12.5px;font-weight:700;color:var(--teal);margin-bottom:10px;margin-top:18px;}
+  .field{margin-bottom:14px;}
+  label{display:block;font-size:13px;color:var(--slate);margin-bottom:5px;}
+  input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-size:14.5px;font-family:inherit;color:var(--teal-dark);background:var(--white);}
+  textarea{resize:none;height:64px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .submit-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:14px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px;}
+  .error-msg{color:var(--red);font-size:12.5px;margin-bottom:10px;}
+  .success{text-align:center;padding:60px 30px;}
+  .success .icon{font-size:40px;margin-bottom:12px;}
+  .admin-header{background:var(--teal);color:var(--white);padding:20px;display:flex;justify-content:space-between;align-items:center;}
+  .logout-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;}
+  .row-card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:8px;}
+  .row-card h4{margin:0;font-size:14px;}
+  .row-card .meta{font-size:12px;color:var(--slate);margin:4px 0 8px;}
+  .actions{display:flex;gap:6px;}
+  .btn-approve,.btn-reject{font-size:12px;padding:7px 12px;border-radius:6px;cursor:pointer;border:1px solid var(--line);}
+  .btn-approve{border-color:var(--green);background:var(--green);color:var(--white);}
+  .btn-reject{border-color:#EAD2C8;color:var(--red);background:var(--white);}
+  .loading{padding:20px;font-size:13px;color:var(--slate);}
+</style>
+<style>
+  @keyframes splashFadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+  #splash {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(160deg, #0F3D3E 0%, #0A2C2D 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    animation: splashFadeOut 0.6s ease 1.6s forwards;
+  }
+  #splash img { width: 96px; height: 96px; border-radius: 22px; animation: splashPop 0.6s ease; }
+  @keyframes splashPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  #splash h1 { color: #F7F3EC; font-size: 19px; margin: 18px 0 4px; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Telugu",sans-serif; }
+  #splash p { color: rgba(247,243,236,0.7); font-size: 12.5px; margin: 0; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Telugu",sans-serif; }
+</style>
+</head>
+<body>
+<div id="splash">
+  <img src="icon-512.png" alt="logo">
+  <h1>Find • కనుగొను</h1>
+  <p>Community-based missing persons registry</p>
+</div>
+<div id="app"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, updateDoc, doc, getDoc, setDoc, getDocs, query, where, serverTimestamp, runTransaction
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import {
+    getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYHhmRIvkqptsT1wAmUY7dL6fu6uhR7gA",
+    authDomain: "missing-persons-register.firebaseapp.com",
+    projectId: "missing-persons-register",
+    storageBucket: "missing-persons-register.firebasestorage.app",
+    messagingSenderId: "557651408125",
+    appId: "1:557651408125:web:2c54183e7742aef834fa94",
+    measurementId: "G-GLK21XRYTF"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  // Secondary app instance: lets an existing admin create a NEW admin's login
+  // without knocking themselves out of their own session (a Firebase quirk).
+  const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+  const secondaryAuth = getAuth(secondaryApp);
+
+  // ---------- imgbb photo upload ----------
+  const IMGBB_API_KEY = "c8311e66b73f6ac1f3a739a7418f2a11";
+  async function uploadPhoto(file) {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+      method: "POST",
+      body: formData,
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error("Photo upload failed");
+    return json.data.url;
+  }
+
+  // ---------- i18n ----------
+  let lang = "en";
+  const T = {
+    te: {
+      appName: "🔎 కనుగొను",
+      heroTitle: "కమ్యూనిటీ కలిసి వెతికితే, త్వరగా దొరుకుతారు",
+      heroSub: "Verified missing person registry",
+      reportMissing: "Missing గా నివేదించండి",
+      reportMissingSub: "కుటుంబం/అధీకృత వ్యక్తుల కోసం",
+      seenSomeone: "ఎవరైనా చూశారా?",
+      seenSomeoneSub: "Sighting report చేయండి",
+      verifiedCases: "Verified Cases",
+      noCases: "ఇంకా verified cases లేవు.",
+      howItWorksTitle: "ఎలా పనిచేస్తుంది:",
+      howItWorks: "ప్రతి registration ధృవీకరించబడిన admin ద్వారా verify అవుతుంది.",
+      navHome: "హోమ్", navNearby: "సమీపంలో", navReport: "నివేదించండి", navAdmin: "అడ్మిన్",
+      regEyebrow: "వివరాలు నమోదు చేయండి",
+      regTitle: "Missing Person Registration",
+      regSub: "కుటుంబ సభ్యుడు లేదా అధీకృత వ్యక్తులు మాత్రమే నమోదు చేయాలి.",
+      personDetails: "వ్యక్తి వివరాలు",
+      photoLabel: "ఫోటో అప్‌లోడ్ చేయండి",
+      photoHint: "స్పష్టమైన, ఇటీవలి ఫోటో",
+      uploadingPhoto: "ఫోటో అప్‌లోడ్ అవుతోంది...",
+      fullName: "పూర్తి పేరు",
+      namePh: "ఉదా: రమేష్ కుమార్",
+      age: "వయస్సు",
+      gender: "లింగం",
+      selectGender: "ఎంచుకోండి",
+      male: "పురుషుడు",
+      female: "స్త్రీ",
+      description: "వివరణ",
+      lastSeenTitle: "చివరిసారి కనిపించిన వివరాలు",
+      location: "ప్రదేశం",
+      locationPh: "ఏరియా, నగరం",
+      caseDetailsTitle: "కేసు వివరాలు",
+      firNumber: "FIR నంబర్",
+      firPh: "వెరిఫికేషన్ కోసం అవసరం",
+      yourPhone: "మీ ఫోన్ నంబర్",
+      phonePh: "పబ్లిక్‌గా చూపబడదు",
+      submitReg: "Verification కోసం సమర్పించండి",
+      submitting: "సమర్పిస్తోంది...",
+      regRequired: "దయచేసి పేరు, వయస్సు, ప్రదేశం నింపండి",
+      regSuccess: "సమర్పించబడింది!",
+      regSuccessSub: "Admin verify చేసిన తర్వాత ఇది కనిపిస్తుంది.",
+      sightEyebrow: "Sighting నివేదించండి",
+      sightTitle: "ఎవరైనా చూశారా?",
+      sightSub: "మీరు ఇచ్చే వివరాలు verified admin కి మాత్రమే వెళ్తాయి.",
+      sightLocationTitle: "మీరు చూసిన ప్రదేశం",
+      landmarkPh: "ఉదా: సికింద్రాబాద్ రైల్వే స్టేషన్",
+      notesLabel: "ఏం గమనించారు?",
+      submitSight: "Sighting సమర్పించండి",
+      sightRequired: "దయచేసి ప్రదేశం నింపండి",
+      sightSuccess: "Sighting నివేదించబడింది",
+      sightSuccessSub: "Admin verify చేసిన తర్వాత కుటుంబానికి తెలియజేయబడుతుంది.",
+      errorGeneric: "Error అయ్యింది, మళ్ళీ try చేయండి.",
+      nearbyEyebrow: "అలర్ట్‌లు",
+      nearbyTitle: "Verified Cases",
+      noNearby: "ఇంకా cases లేవు.",
+      iSawThem: "నేను చూశాను",
+      adminLogin: "Admin Login",
+      email: "Email",
+      password: "Password",
+      login: "Login",
+      loginFailed: "Login విఫలమైంది — email/password చెక్ చేయండి",
+      verifyConsole: "Verify Console",
+      logout: "Logout",
+      pendingReg: "Pending Registrations",
+      pendingSight: "Pending Sightings",
+      noPending: "ఏమీ pending లేవు.",
+      approve: "Approve",
+      reject: "Reject",
+      firNone: "లేదు",
+      loading: "Loading...",
+      searchPlaceholder: "పేరు లేదా ప్రాంతం వెతకండి",
+      noSearchResults: "ఏమీ కనిపించలేదు.",
+      useCurrentLocation: "📍 ప్రస్తుత లొకేషన్ వాడండి",
+      locating: "లొకేషన్ పొందుతోంది...",
+      locationDenied: "లొకేషన్ access నిరాకరించబడింది, మాన్యువల్‌గా టైప్ చేయండి",
+      mapUnavailable: "మ్యాప్ అందుబాటులో లేదు",
+      reportFound: "కనుగొన్నారా? నివేదించండి",
+      foundEyebrow: "Found Report",
+      foundTitle: "వ్యక్తిని కనుగొన్నారా?",
+      foundSub: "దయచేసి ఇటీవలి ఫోటో అప్‌లోడ్ చేయండి — ఇది admin verify చేయడానికి సహాయపడుతుంది.",
+      foundPhotoRequired: "దయచేసి ఫోటో అప్‌లోడ్ చేయండి",
+      submitFound: "Found నివేదించండి",
+      foundSuccess: "కనుగొన్నారని నివేదించబడింది!",
+      foundSuccessSub: "Admin verify చేసిన తర్వాత కేసు 'కనుగొన్నారు' గా అప్‌డేట్ అవుతుంది.",
+      pendingFound: "Pending Found Reports",
+      lastSeenDatetime: "చివరిసారి కనిపించిన తేదీ/సమయం",
+      contactName: "సంప్రదించవలసిన వ్యక్తి పేరు",
+      contactNamePh: "ఉదా: సురేష్ (సోదరుడు)",
+      descPh: "దుస్తులు, గుర్తులు, ఇతర గుర్తింపు వివరాలు",
+      caseIdLabel: "కేసు ఐడి",
+      underVerification: "పరిశీలనలో ఉంది",
+      statusVerified: "ధృవీకరించబడింది",
+      statusFound: "కనుగొన్నారు",
+      statusClosed: "మూసివేయబడింది",
+      markUnderReview: "సమీక్షలో పెట్టండి",
+      closeCase: "కేసు మూసివేయండి",
+      verifiedManage: "Verified Cases (నిర్వహణ)",
+      ageMin: "కనీస వయస్సు",
+      ageMax: "గరిష్ట వయస్సు",
+      caseIdSearch: "Case ID వెతకండి",
+      emergencyTitle: "అత్యవసర సంప్రదింపు",
+      police: "పోలీస్",
+      childHelpline: "చైల్డ్ హెల్ప్‌లైన్",
+      womenHelpline: "మహిళా హెల్ప్‌లైన్",
+      district: "జిల్లా",
+      state: "రాష్ట్రం",
+      dateFilter: "తేదీ",
+      radiusLabel: "పరిధి",
+      foundLocationLabel: "కనుగొన్న ప్రదేశం",
+      foundDatetimeLabel: "కనుగొన్న తేదీ/సమయం",
+      policeStation: "పోలీస్ స్టేషన్ (ఐచ్ఛికం)",
+      policeContact: "పోలీస్ కాంటాక్ట్ నంబర్ (ఐచ్ఛికం)",
+      matchTitle: "సాధ్యమైన సరిపోలికలు",
+      matchNone: "సరిపోలికలు కనిపించలేదు",
+      matchHint: "మీరు ఇచ్చిన వివరాల ఆధారంగా — ఏదైనా సరిపోతే select చేయండి (ఐచ్ఛికం)",
+      approxAge: "సుమారు వయస్సు (ఐచ్ఛికం)",
+      approxGender: "లింగం (ఐచ్ఛికం)",
+      linkedCase: "లింక్ చేయబడింది",
+      distanceAway: "కి.మీ దూరంలో",
+      allCases: "అన్ని Cases",
+      nearbyOnly: "సమీపంలో మాత్రమే",
+      enableLocation: "లొకేషన్ enable చేయండి",
+      myDistrict: "మీ జిల్లా",
+      myDistrictPh: "మీ జిల్లా పేరు టైప్ చేయండి",
+      setDistrict: "సెట్ చేయండి",
+      newCasesAlert: "మీ జిల్లాలో కొత్త cases",
+      changeDistrict: "మార్చండి",
+
+      markCaseFound: "Case ని Found గా mark చేయండి",
+    },
+    en: {
+      appName: "🔎 Find",
+      heroTitle: "When the community searches together, they're found faster",
+      heroSub: "Verified missing person registry",
+      reportMissing: "Report Missing",
+      reportMissingSub: "For family/authorized persons",
+      seenSomeone: "Seen someone?",
+      seenSomeoneSub: "File a sighting report",
+      verifiedCases: "Verified Cases",
+      noCases: "No verified cases yet.",
+      howItWorksTitle: "How it works:",
+      howItWorks: "Every registration is verified by a certified admin before it goes live.",
+      navHome: "Home", navNearby: "Nearby", navReport: "Report", navAdmin: "Admin",
+      regEyebrow: "Enter Details",
+      regTitle: "Missing Person Registration",
+      regSub: "Only a family member or authorized person should register.",
+      personDetails: "Person Details",
+      photoLabel: "Upload Photo",
+      photoHint: "Clear, recent photo",
+      uploadingPhoto: "Uploading photo...",
+      fullName: "Full Name",
+      namePh: "e.g. Ramesh Kumar",
+      age: "Age",
+      gender: "Gender",
+      selectGender: "Select",
+      male: "Male",
+      female: "Female",
+      description: "Description",
+      lastSeenTitle: "Last Seen Details",
+      location: "Location",
+      locationPh: "Area, City",
+      caseDetailsTitle: "Case Details",
+      firNumber: "FIR Number",
+      firPh: "Needed for verification",
+      yourPhone: "Your Phone Number",
+      phonePh: "Not shown publicly",
+      submitReg: "Submit for Verification",
+      submitting: "Submitting...",
+      regRequired: "Please fill in name, age, and location",
+      regSuccess: "Submitted!",
+      regSuccessSub: "This will appear once verified by an admin.",
+      sightEyebrow: "Report a Sighting",
+      sightTitle: "Have you seen this person?",
+      sightSub: "The details you provide go only to a verified admin.",
+      sightLocationTitle: "Where you saw them",
+      landmarkPh: "e.g. Secunderabad Railway Station",
+      notesLabel: "What did you notice?",
+      submitSight: "Submit Sighting",
+      sightRequired: "Please fill in the location",
+      sightSuccess: "Sighting Reported",
+      sightSuccessSub: "The family will be notified once an admin verifies this.",
+      errorGeneric: "Something went wrong, please try again.",
+      nearbyEyebrow: "Alerts",
+      nearbyTitle: "Verified Cases",
+      noNearby: "No cases yet.",
+      iSawThem: "I saw them",
+      adminLogin: "Admin Login",
+      email: "Email",
+      password: "Password",
+      login: "Login",
+      loginFailed: "Login failed — check email/password",
+      verifyConsole: "Verify Console",
+      logout: "Logout",
+      pendingReg: "Pending Registrations",
+      pendingSight: "Pending Sightings",
+      noPending: "Nothing pending.",
+      approve: "Approve",
+      reject: "Reject",
+      firNone: "None",
+      loading: "Loading...",
+      searchPlaceholder: "Search by name or location",
+      noSearchResults: "No matches found.",
+      useCurrentLocation: "📍 Use current location",
+      locating: "Getting location...",
+      locationDenied: "Location access denied, please type manually",
+      mapUnavailable: "Map unavailable",
+      reportFound: "Report Found",
+      foundEyebrow: "Found Report",
+      foundTitle: "Found this person?",
+      foundSub: "Please upload a recent photo — this helps the admin verify it.",
+      foundPhotoRequired: "Please upload a photo",
+      submitFound: "Report Found",
+      foundSuccess: "Reported as Found!",
+      foundSuccessSub: "The case will be marked as found once an admin verifies this.",
+      pendingFound: "Pending Found Reports",
+      lastSeenDatetime: "Last Seen Date/Time",
+      contactName: "Contact Person Name",
+      contactNamePh: "e.g. Suresh (brother)",
+      descPh: "Clothes, marks, other identifying details",
+      caseIdLabel: "Case ID",
+      underVerification: "Under Verification",
+      statusVerified: "Verified",
+      statusFound: "Found",
+      statusClosed: "Closed",
+      markUnderReview: "Mark Under Review",
+      closeCase: "Close Case",
+      verifiedManage: "Verified Cases (Manage)",
+      ageMin: "Min Age",
+      ageMax: "Max Age",
+      caseIdSearch: "Search Case ID",
+      emergencyTitle: "Emergency Contact",
+      police: "Police",
+      childHelpline: "Child Helpline",
+      womenHelpline: "Women Helpline",
+      district: "District",
+      state: "State",
+      dateFilter: "Date",
+      radiusLabel: "Radius",
+      foundLocationLabel: "Location Found",
+      foundDatetimeLabel: "Date/Time Found",
+      policeStation: "Police Station (optional)",
+      policeContact: "Police Contact Number (optional)",
+      matchTitle: "Possible Matches",
+      matchNone: "No matches found",
+      matchHint: "Based on the details you gave — select one if it matches (optional)",
+      approxAge: "Approximate Age (optional)",
+      approxGender: "Gender (optional)",
+      linkedCase: "Linked",
+      distanceAway: "km away",
+      allCases: "All Cases",
+      nearbyOnly: "Nearby Only",
+      enableLocation: "Enable Location",
+      myDistrict: "Your District",
+      myDistrictPh: "Type your district name",
+      setDistrict: "Set",
+      newCasesAlert: "new cases in your district",
+      changeDistrict: "Change",
+
+      markCaseFound: "Mark case as Found",
+      history: "History",
+      profile: "Profile",
+      queueTab: "Queue",
+      closedCases: "Closed Cases",
+      noClosedCases: "No closed cases yet.",
+      yourProfile: "Your Profile",
+      adminName: "Name",
+      adminRole: "Role",
+      addNewAdminTitle: "Add a New Admin",
+      addNewAdminSub: "Give admin access to police/NGO members",
+      newAdminName: "Their Name",
+      newAdminEmail: "Their Email",
+      newAdminPassword: "Set Their Password",
+      addAdminBtn: "Add as Admin",
+      addAdminSuccess: "New admin added!",
+      addAdminError: "Failed to add — the email may already be in use",
+      history: "హిస్టరీ",
+      profile: "ప్రొఫైల్",
+      queueTab: "క్యూ",
+      closedCases: "మూసివేసిన Cases",
+      noClosedCases: "ఇంకా మూసివేసిన cases లేవు.",
+      yourProfile: "మీ ప్రొఫైల్",
+      adminName: "పేరు",
+      adminRole: "పాత్ర",
+      addNewAdminTitle: "కొత్త Admin ని add చేయండి",
+      addNewAdminSub: "పోలీస్/NGO వ్యక్తులకు admin access ఇవ్వడానికి",
+      newAdminName: "వాళ్ళ పేరు",
+      newAdminEmail: "వాళ్ళ Email",
+      newAdminPassword: "వాళ్ళ Password సెట్ చేయండి",
+      addAdminBtn: "Admin గా Add చేయండి",
+      addAdminSuccess: "కొత్త admin add అయ్యింది!",
+      addAdminError: "Add చేయడంలో విఫలమైంది — email already వాడుకలో ఉండొచ్చు",
+    },
+    hi: {
+      appName: "🔎 खोजें",
+      heroTitle: "जब समुदाय मिलकर खोजता है, तो जल्दी मिलते हैं",
+      heroSub: "सत्यापित लापता व्यक्ति रजिस्ट्री",
+      reportMissing: "लापता की रिपोर्ट करें",
+      reportMissingSub: "परिवार/अधिकृत व्यक्तियों के लिए",
+      seenSomeone: "किसी को देखा?",
+      seenSomeoneSub: "दिखने की रिपोर्ट दर्ज करें",
+      verifiedCases: "सत्यापित मामले",
+      noCases: "अभी तक कोई सत्यापित मामला नहीं है।",
+      howItWorksTitle: "यह कैसे काम करता है:",
+      howItWorks: "हर पंजीकरण लाइव होने से पहले एक प्रमाणित एडमिन द्वारा सत्यापित किया जाता है।",
+      navHome: "होम", navNearby: "आस-पास", navReport: "रिपोर्ट", navAdmin: "एडमिन",
+      regEyebrow: "विवरण दर्ज करें",
+      regTitle: "लापता व्यक्ति पंजीकरण",
+      regSub: "केवल परिवार का सदस्य या अधिकृत व्यक्ति ही पंजीकरण करे।",
+      personDetails: "व्यक्ति का विवरण",
+      photoLabel: "फोटो अपलोड करें",
+      photoHint: "स्पष्ट, हाल की फोटो",
+      uploadingPhoto: "फोटो अपलोड हो रही है...",
+      fullName: "पूरा नाम",
+      namePh: "उदा: रमेश कुमार",
+      age: "उम्र",
+      gender: "लिंग",
+      selectGender: "चुनें",
+      male: "पुरुष",
+      female: "महिला",
+      description: "विवरण",
+      lastSeenTitle: "आखिरी बार देखे जाने का विवरण",
+      location: "स्थान",
+      locationPh: "क्षेत्र, शहर",
+      caseDetailsTitle: "मामले का विवरण",
+      firNumber: "एफआईआर नंबर",
+      firPh: "सत्यापन के लिए आवश्यक",
+      yourPhone: "आपका फोन नंबर",
+      phonePh: "सार्वजनिक रूप से नहीं दिखेगा",
+      submitReg: "सत्यापन के लिए सबमिट करें",
+      submitting: "सबमिट हो रहा है...",
+      regRequired: "कृपया नाम, उम्र और स्थान भरें",
+      regSuccess: "सबमिट हो गया!",
+      regSuccessSub: "एडमिन द्वारा सत्यापित होने पर यह दिखेगा।",
+      sightEyebrow: "दिखने की रिपोर्ट करें",
+      sightTitle: "क्या आपने इस व्यक्ति को देखा है?",
+      sightSub: "आपके द्वारा दी गई जानकारी केवल सत्यापित एडमिन को जाएगी।",
+      sightLocationTitle: "आपने उन्हें कहाँ देखा",
+      landmarkPh: "उदा: सिकंदराबाद रेलवे स्टेशन",
+      notesLabel: "आपने क्या देखा?",
+      submitSight: "रिपोर्ट सबमिट करें",
+      sightRequired: "कृपया स्थान भरें",
+      sightSuccess: "रिपोर्ट दर्ज हो गई",
+      sightSuccessSub: "एडमिन सत्यापन के बाद परिवार को सूचित किया जाएगा।",
+      errorGeneric: "कुछ गलत हुआ, कृपया फिर से प्रयास करें।",
+      nearbyEyebrow: "अलर्ट",
+      nearbyTitle: "सत्यापित मामले",
+      noNearby: "अभी तक कोई मामला नहीं है।",
+      iSawThem: "मैंने उन्हें देखा",
+      adminLogin: "एडमिन लॉगिन",
+      email: "ईमेल",
+      password: "पासवर्ड",
+      login: "लॉगिन",
+      loginFailed: "लॉगिन विफल — ईमेल/पासवर्ड जांचें",
+      verifyConsole: "सत्यापन कंसोल",
+      logout: "लॉगआउट",
+      pendingReg: "लंबित पंजीकरण",
+      pendingSight: "लंबित रिपोर्ट",
+      noPending: "कुछ भी लंबित नहीं है।",
+      approve: "स्वीकृत करें",
+      reject: "अस्वीकार करें",
+      firNone: "कोई नहीं",
+      loading: "लोड हो रहा है...",
+      searchPlaceholder: "नाम या स्थान से खोजें",
+      noSearchResults: "कोई मेल नहीं मिला।",
+      useCurrentLocation: "📍 वर्तमान स्थान का उपयोग करें",
+      locating: "स्थान प्राप्त हो रहा है...",
+      locationDenied: "स्थान की अनुमति नहीं मिली, कृपया मैन्युअल रूप से टाइप करें",
+      mapUnavailable: "मानचित्र उपलब्ध नहीं है",
+      reportFound: "मिलने की रिपोर्ट करें",
+      foundEyebrow: "मिलने की रिपोर्ट",
+      foundTitle: "क्या आपने इस व्यक्ति को पाया?",
+      foundSub: "कृपया हाल की फोटो अपलोड करें — इससे एडमिन को सत्यापित करने में मदद मिलेगी।",
+      foundPhotoRequired: "कृपया एक फोटो अपलोड करें",
+      submitFound: "मिलने की रिपोर्ट करें",
+      foundSuccess: "मिलने की रिपोर्ट दर्ज हुई!",
+      foundSuccessSub: "एडमिन सत्यापन के बाद मामला 'मिला' के रूप में अपडेट होगा।",
+      pendingFound: "लंबित 'मिला' रिपोर्ट्स",
+      lastSeenDatetime: "आखिरी बार देखे जाने की तारीख/समय",
+      contactName: "संपर्क व्यक्ति का नाम",
+      contactNamePh: "उदा: सुरेश (भाई)",
+      descPh: "कपड़े, निशान, अन्य पहचान विवरण",
+      caseIdLabel: "केस आईडी",
+      underVerification: "समीक्षा में",
+      statusVerified: "सत्यापित",
+      statusFound: "मिल गया",
+      statusClosed: "बंद",
+      markUnderReview: "समीक्षा में डालें",
+      closeCase: "केस बंद करें",
+      verifiedManage: "सत्यापित मामले (प्रबंधन)",
+      ageMin: "न्यूनतम उम्र",
+      ageMax: "अधिकतम उम्र",
+      caseIdSearch: "केस आईडी खोजें",
+      emergencyTitle: "आपातकालीन संपर्क",
+      police: "पुलिस",
+      childHelpline: "चाइल्ड हेल्पलाइन",
+      womenHelpline: "महिला हेल्पलाइन",
+      district: "जिला",
+      state: "राज्य",
+      dateFilter: "तारीख",
+      radiusLabel: "दायरा",
+      foundLocationLabel: "मिलने का स्थान",
+      foundDatetimeLabel: "मिलने की तारीख/समय",
+      policeStation: "पुलिस स्टेशन (वैकल्पिक)",
+      policeContact: "पुलिस संपर्क नंबर (वैकल्पिक)",
+      matchTitle: "संभावित मिलान",
+      matchNone: "कोई मिलान नहीं मिला",
+      matchHint: "आपके दिए विवरण के आधार पर — यदि मेल खाता है तो चुनें (वैकल्पिक)",
+      approxAge: "अनुमानित उम्र (वैकल्पिक)",
+      approxGender: "लिंग (वैकल्पिक)",
+      linkedCase: "जुड़ा हुआ",
+      distanceAway: "किमी दूर",
+      allCases: "सभी मामले",
+      nearbyOnly: "केवल आस-पास",
+      enableLocation: "स्थान सक्षम करें",
+      myDistrict: "आपका जिला",
+      myDistrictPh: "अपने जिले का नाम टाइप करें",
+      setDistrict: "सेट करें",
+      newCasesAlert: "आपके जिले में नए मामले",
+      changeDistrict: "बदलें",
+      markCaseFound: "केस को 'मिला' चिह्नित करें",
+      history: "इतिहास",
+      profile: "प्रोफ़ाइल",
+      queueTab: "कतार",
+      closedCases: "बंद मामले",
+      noClosedCases: "अभी तक कोई बंद मामला नहीं है।",
+      yourProfile: "आपकी प्रोफ़ाइल",
+      adminName: "नाम",
+      adminRole: "भूमिका",
+      addNewAdminTitle: "नया एडमिन जोड़ें",
+      addNewAdminSub: "पुलिस/एनजीओ सदस्यों को एडमिन एक्सेस दें",
+      newAdminName: "उनका नाम",
+      newAdminEmail: "उनका ईमेल",
+      newAdminPassword: "उनका पासवर्ड सेट करें",
+      addAdminBtn: "एडमिन के रूप में जोड़ें",
+      addAdminSuccess: "नया एडमिन जोड़ा गया!",
+      addAdminError: "जोड़ने में विफल — ईमेल पहले से उपयोग में हो सकता है",
+    }
+  };
+  function t(key) { return T[lang][key] || key; }
+
+  function langToggleHtml() {
+    return `<div class="lang-toggle">
+      <span class="${lang==='en'?'active':''}" data-lang="en">EN</span>
+      <span class="${lang==='te'?'active':''}" data-lang="te">తె</span>
+      <span class="${lang==='hi'?'active':''}" data-lang="hi">हि</span>
+    </div>`;
+  }
+  function attachLangToggle() {
+    document.querySelectorAll("[data-lang]").forEach(el => {
+      el.addEventListener("click", () => {
+        lang = el.dataset.lang;
+        document.documentElement.lang = lang;
+        render();
+      });
+    });
+  }
+
+  // ---------- Firestore helpers ----------
+  async function generateCaseId() {
+    const year = new Date().getFullYear();
+    const counterRef = doc(db, "counters", "missing_persons");
+    const seq = await runTransaction(db, async (tx) => {
+      const snap = await tx.get(counterRef);
+      const current = snap.exists() ? (snap.data().count || 0) : 0;
+      const next = current + 1;
+      tx.set(counterRef, { count: next }, { merge: true });
+      return next;
+    });
+    return `MP-${year}-${String(seq).padStart(4, "0")}`;
+  }
+  async function submitMissingPersonRegistration(data) {
+    const case_id = await generateCaseId();
+    return addDoc(collection(db, "missing_persons"), { ...data, case_id, status: "pending", created_at: serverTimestamp() });
+  }
+  async function submitSightingReport(data) {
+    return addDoc(collection(db, "sighting_reports"), { ...data, status: "pending", type: "sighting", created_at: serverTimestamp() });
+  }
+  async function submitFoundReport(data) {
+    return addDoc(collection(db, "sighting_reports"), { ...data, status: "pending", type: "found", created_at: serverTimestamp() });
+  }
+  async function getApprovedCases() {
+    const q = query(collection(db, "missing_persons"), where("status", "==", "verified"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  async function getPendingQueue() {
+    const casesQ = query(collection(db, "missing_persons"), where("status", "in", ["pending", "under_verification"]));
+    const sightingsQ = query(collection(db, "sighting_reports"), where("status", "==", "pending"));
+    const [c, s] = await Promise.all([getDocs(casesQ), getDocs(sightingsQ)]);
+    const allReports = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    return {
+      cases: c.docs.map(d => ({ id: d.id, ...d.data() })),
+      sightings: allReports.filter(r => r.type !== "found"),
+      foundReports: allReports.filter(r => r.type === "found"),
+    };
+  }
+  async function getVerifiedCasesForAdmin() {
+    const q = query(collection(db, "missing_persons"), where("status", "==", "verified"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  async function markUnderVerification(id) { await updateDoc(doc(db, "missing_persons", id), { status: "under_verification" }); }
+  async function closeCase(id) { await updateDoc(doc(db, "missing_persons", id), { status: "closed" }); }
+  async function getClosedCases() {
+    const q = query(collection(db, "missing_persons"), where("status", "==", "closed"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  async function getAdminProfile(uid) {
+    const snap = await getDoc(doc(db, "admins", uid));
+    return snap.exists() ? snap.data() : null;
+  }
+  async function addNewAdmin(email, password, name) {
+    // Uses the secondary app instance so the current admin's session is untouched.
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+    const newUid = cred.user.uid;
+    await setDoc(doc(db, "admins", newUid), { name: name || "", role: "admin", verified: true });
+    await secondaryAuth.signOut();
+    return newUid;
+  }
+  async function approveCase(id) { await updateDoc(doc(db, "missing_persons", id), { status: "verified" }); }
+  async function rejectCase(id) { await updateDoc(doc(db, "missing_persons", id), { status: "rejected" }); }
+  async function approveSighting(id) { await updateDoc(doc(db, "sighting_reports", id), { status: "verified" }); }
+  async function rejectSighting(id) { await updateDoc(doc(db, "sighting_reports", id), { status: "rejected" }); }
+  async function approveFound(reportId, caseId) {
+    await updateDoc(doc(db, "sighting_reports", reportId), { status: "verified" });
+    if (caseId) await updateDoc(doc(db, "missing_persons", caseId), { status: "found" });
+  }
+  async function rejectFound(id) { await updateDoc(doc(db, "sighting_reports", id), { status: "rejected" }); }
+
+  // ---------- Simple router / state ----------
+  const el = document.getElementById("app");
+  let currentUser = undefined;
+  onAuthStateChanged(auth, (u) => { currentUser = u; if (location.hash === "#admin") render(); });
+
+  window.addEventListener("hashchange", render);
+
+  function bottomNav(active) {
+    const tabs = [["home",t("navHome")],["nearby",t("navNearby")],["sighting",t("navReport")],["admin",t("navAdmin")]];
+    return `<nav>${tabs.map(([k,l]) => `<div class="tab ${active===k?'active':''}" onclick="location.hash='#${k}'">${l}</div>`).join('')}</nav>`;
+  }
+
+  async function render() {
+    const screen = (location.hash || "#home").slice(1);
+    if (screen === "home") return renderHome();
+    if (screen === "register") return renderRegister();
+    if (screen === "sighting") return renderSighting();
+    if (screen.startsWith("found/")) return renderFoundReport(screen.slice(6));
+    if (screen === "nearby") return renderNearby();
+    if (screen === "admin") return renderAdmin();
+    renderHome();
+  }
+
+  async function renderHome() {
+    el.innerHTML = `
+      <header>
+        ${langToggleHtml()}
+        <div class="eyebrow">${t('appName')}</div>
+        <h1>${t('heroTitle')}</h1>
+        <p>${t('heroSub')}</p>
+      </header>
+      <div id="districtBanner"></div>
+      <div class="cta-row">
+        <div class="cta report" onclick="location.hash='#register'">
+          <div class="t1">${t('reportMissing')}</div>
+          <div class="t2">${t('reportMissingSub')}</div>
+        </div>
+        <div class="cta sight" onclick="location.hash='#sighting'">
+          <div class="t1">${t('seenSomeone')}</div>
+          <div class="t2">${t('seenSomeoneSub')}</div>
+        </div>
+      </div>
+      <div style="padding:0 20px 6px;">
+        <div onclick="location.hash='#found/none'" style="background:#EEF4EF;border:1px solid #D3E3D6;border-radius:10px;padding:12px 14px;cursor:pointer;font-size:12.5px;color:var(--green);font-weight:700;">
+          📸 ${t('reportFound')}
+        </div>
+      </div>
+      <div class="search-box">
+        <span class="icon">🔍</span>
+        <input id="homeSearch" type="text" placeholder="${t('searchPlaceholder')}">
+      </div>
+      <div style="display:flex;gap:8px;padding:8px 20px 0;">
+        <input id="homeAgeMin" type="number" placeholder="${t('ageMin')}" style="flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;">
+        <input id="homeAgeMax" type="number" placeholder="${t('ageMax')}" style="flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;">
+        <input id="homeCaseId" type="text" placeholder="${t('caseIdSearch')}" style="flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;">
+      </div>
+      <div style="padding:8px 20px 0;">
+        <input id="homeDate" type="date" style="width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;">
+      </div>
+      <div class="section" id="caseList">
+        <div style="font-size:14.5px;margin-bottom:12px;">${t('verifiedCases')}</div>
+        <div class="loading">${t('loading')}</div>
+      </div>
+      <div class="note"><b style="color:var(--green)">${t('howItWorksTitle')}</b> ${t('howItWorks')}</div>
+      <div class="note" style="background:#FDF7F3;border-color:#EAD2C8;">
+        <b style="color:var(--amber)">🚨 ${t('emergencyTitle')}:</b><br>
+        <a href="tel:100" style="color:var(--teal);text-decoration:none;">${t('police')} 100</a> &nbsp;•&nbsp;
+        <a href="tel:1098" style="color:var(--teal);text-decoration:none;">${t('childHelpline')} 1098</a> &nbsp;•&nbsp;
+        <a href="tel:181" style="color:var(--teal);text-decoration:none;">${t('womenHelpline')} 181</a>
+      </div>
+      ${bottomNav("home")}
+    `;
+    attachLangToggle();
+    function renderCaseCards(cases) {
+      if (cases.length === 0) {
+        return `<div style="font-size:14.5px;margin-bottom:12px;">${t('verifiedCases')}</div><div style="font-size:13px;color:var(--slate);background:#FBF9F4;padding:14px;border-radius:8px;">${t('noCases')}</div>`;
+      }
+      return `<div style="font-size:14.5px;margin-bottom:12px;">${t('verifiedCases')}</div>` + cases.map(c => `
+          <div class="case-card" onclick="location.hash='#nearby'">
+            <div class="ph" style="${c.photo_url ? `background-image:url('${c.photo_url}');background-size:cover;background-position:center;cursor:zoom-in;` : ''}" ${c.photo_url ? `onclick="event.stopPropagation();window.open('${c.photo_url}','_blank')"` : ''}></div>
+            <div class="case-body"><h4>${c.name}, ${c.age}</h4><div class="meta">${c.last_seen_location||''}${c.district ? `, ${c.district}` : ''} ${c.case_id ? `• ${c.case_id}` : ''}</div></div>
+            <span style="color:var(--slate)">›</span>
+          </div>`).join('');
+    }
+    try {
+      const cases = await getApprovedCases();
+      const list = document.getElementById("caseList");
+      list.innerHTML = renderCaseCards(cases);
+
+      function renderDistrictBanner() {
+        const banner = document.getElementById("districtBanner");
+        const myDistrict = localStorage.getItem("myDistrict");
+        if (!myDistrict) {
+          banner.innerHTML = `
+            <div style="margin:16px 20px 0;background:#FBF9F4;border:1px solid var(--line);border-radius:8px;padding:12px 14px;">
+              <label style="display:block;font-size:12px;color:var(--slate);margin-bottom:6px;">🔔 ${t('myDistrict')}</label>
+              <div style="display:flex;gap:8px;">
+                <input id="districtInput" type="text" placeholder="${t('myDistrictPh')}" style="flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;">
+                <button id="districtSetBtn" style="background:var(--teal);color:var(--white);border:none;padding:9px 14px;border-radius:8px;font-size:12.5px;">${t('setDistrict')}</button>
+              </div>
+            </div>`;
+          document.getElementById("districtSetBtn").addEventListener("click", () => {
+            const val = document.getElementById("districtInput").value.trim();
+            if (val) {
+              localStorage.setItem("myDistrict", val);
+              localStorage.setItem("districtLastCheck", String(Date.now()));
+              renderDistrictBanner();
+            }
+          });
+          return;
+        }
+        const lastCheck = parseInt(localStorage.getItem("districtLastCheck") || "0", 10);
+        const newCases = cases.filter(c =>
+          (c.district || "").trim().toLowerCase() === myDistrict.trim().toLowerCase() &&
+          ((c.created_at && c.created_at.seconds) ? (c.created_at.seconds * 1000) : Date.now()) > lastCheck
+        );
+        banner.innerHTML = `
+          <div style="margin:16px 20px 0;background:${newCases.length > 0 ? '#FDF7F3' : '#FBF9F4'};border:1px solid ${newCases.length > 0 ? '#EAD2C8' : 'var(--line)'};border-radius:8px;padding:12px 14px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;">
+            <span>${newCases.length > 0 ? `🔔 <b style="color:var(--amber);">${newCases.length}</b> ${t('newCasesAlert')}: <b>${myDistrict}</b>` : `📍 ${myDistrict}`}</span>
+            <span id="districtChangeBtn" style="color:var(--teal);cursor:pointer;font-size:11.5px;text-decoration:underline;">${t('changeDistrict')}</span>
+          </div>`;
+        document.getElementById("districtChangeBtn").addEventListener("click", () => {
+          localStorage.removeItem("myDistrict");
+          renderDistrictBanner();
+        });
+        // Advance checkpoint only up to the newest case's own timestamp (cases seen this visit),
+        // never to "now" — so genuinely new cases arriving later still trigger an alert.
+        const districtCases = cases.filter(c => (c.district || "").trim().toLowerCase() === myDistrict.trim().toLowerCase());
+        const maxSeen = districtCases.reduce((max, c) => {
+          const t = (c.created_at && c.created_at.seconds) ? c.created_at.seconds * 1000 : 0;
+          return Math.max(max, t);
+        }, lastCheck);
+        localStorage.setItem("districtLastCheck", String(maxSeen));
+      }
+      renderDistrictBanner();
+
+      function applyFilters() {
+        const q = document.getElementById("homeSearch").value.trim().toLowerCase();
+        const ageMin = parseInt(document.getElementById("homeAgeMin").value, 10);
+        const ageMax = parseInt(document.getElementById("homeAgeMax").value, 10);
+        const caseIdQ = document.getElementById("homeCaseId").value.trim().toLowerCase();
+        const dateQ = document.getElementById("homeDate").value;
+        let filtered = cases;
+        if (q) filtered = filtered.filter(c =>
+          (c.name || "").toLowerCase().includes(q) ||
+          (c.last_seen_location || "").toLowerCase().includes(q) ||
+          (c.district || "").toLowerCase().includes(q) ||
+          (c.state || "").toLowerCase().includes(q)
+        );
+        if (!isNaN(ageMin)) filtered = filtered.filter(c => parseInt(c.age, 10) >= ageMin);
+        if (!isNaN(ageMax)) filtered = filtered.filter(c => parseInt(c.age, 10) <= ageMax);
+        if (caseIdQ) filtered = filtered.filter(c => (c.case_id || "").toLowerCase().includes(caseIdQ));
+        if (dateQ) filtered = filtered.filter(c => (c.last_seen_datetime || "").startsWith(dateQ));
+        list.innerHTML = filtered.length === 0
+          ? `<div style="font-size:14.5px;margin-bottom:12px;">${t('verifiedCases')}</div><div style="font-size:13px;color:var(--slate);background:#FBF9F4;padding:14px;border-radius:8px;">${t('noSearchResults')}</div>`
+          : renderCaseCards(filtered);
+      }
+      ["homeSearch","homeAgeMin","homeAgeMax","homeCaseId","homeDate"].forEach(id => {
+        document.getElementById(id).addEventListener("input", applyFilters);
+      });
+    } catch (e) { console.error(e); }
+  }
+
+  function renderRegister() {
+    el.innerHTML = `
+      <header>
+        ${langToggleHtml()}
+        <div class="eyebrow">${t('regEyebrow')}</div>
+        <h1>${t('regTitle')}</h1>
+        <p>${t('regSub')}</p>
+      </header>
+      <form id="regForm">
+        <div class="group-title">${t('personDetails')}</div>
+        <div class="field">
+          <label>${t('photoLabel')}</label>
+          <input type="file" id="r_photo" accept="image/*" style="border:2px dashed var(--line);padding:20px 10px;background:#FBF9F4;">
+          <div id="r_photo_preview" style="display:none;margin-top:10px;position:relative;width:110px;">
+            <img id="r_photo_img" style="width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--line);">
+            <span id="r_photo_clear" style="position:absolute;top:-8px;right:-8px;background:var(--red);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;">✕</span>
+          </div>
+          <small style="color:var(--slate);font-size:11px;">${t('photoHint')}</small>
+        </div>
+        <div class="field"><label>${t('fullName')}</label><input id="r_name" placeholder="${t('namePh')}"></div>
+        <div class="row2">
+          <div class="field"><label>${t('age')}</label><input id="r_age" type="number" placeholder="18+"></div>
+          <div class="field"><label>${t('gender')}</label><select id="r_gender"><option value="">${t('selectGender')}</option><option>${t('male')}</option><option>${t('female')}</option></select></div>
+        </div>
+        <div class="field"><label>${t('description')}</label><textarea id="r_desc" placeholder="${t('descPh')}"></textarea></div>
+        <div class="group-title">${t('lastSeenTitle')}</div>
+        <div class="field"><label>${t('location')}</label><input id="r_location" placeholder="${t('locationPh')}"></div>
+        <div class="row2">
+          <div class="field"><label>${t('district')}</label><input id="r_district" placeholder="${t('district')}"></div>
+          <div class="field"><label>${t('state')}</label><input id="r_state" placeholder="${t('state')}"></div>
+        </div>
+        <button type="button" id="r_getloc" style="background:#EEF4EF;border:1px solid #D3E3D6;color:var(--green);padding:9px 14px;border-radius:8px;font-size:12.5px;margin-bottom:14px;cursor:pointer;">${t('useCurrentLocation')}</button>
+        <div id="r_locstatus" style="font-size:11.5px;color:var(--slate);margin-bottom:10px;"></div>
+        <div class="field"><label>${t('lastSeenDatetime')}</label><input id="r_datetime" type="datetime-local"></div>
+        <div class="group-title">${t('caseDetailsTitle')}</div>
+        <div class="field"><label>${t('contactName')}</label><input id="r_contact_name" placeholder="${t('contactNamePh')}"></div>
+        <div class="field"><label>${t('firNumber')}</label><input id="r_fir" placeholder="${t('firPh')}"></div>
+        <div class="field"><label>${t('policeStation')}</label><input id="r_police_station" placeholder="${t('policeStation')}"></div>
+        <div class="field"><label>${t('policeContact')}</label><input id="r_police_contact" type="tel" placeholder="${t('policeContact')}"></div>
+        <div class="field"><label>${t('yourPhone')}</label><input id="r_phone" placeholder="${t('phonePh')}"></div>
+        <input type="text" id="r_hp" name="website" style="position:absolute;left:-9999px;top:-9999px;" tabindex="-1" autocomplete="off">
+        <div id="r_error" class="error-msg" style="display:none;"></div>
+        <button type="submit" class="submit-btn" id="r_submit">${t('submitReg')}</button>
+      </form>
+    `;
+    attachLangToggle();
+    let capturedLat = null, capturedLng = null;
+    document.getElementById("r_photo").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      const preview = document.getElementById("r_photo_preview");
+      if (file) {
+        document.getElementById("r_photo_img").src = URL.createObjectURL(file);
+        preview.style.display = "block";
+      } else {
+        preview.style.display = "none";
+      }
+    });
+    document.getElementById("r_photo_clear").addEventListener("click", () => {
+      document.getElementById("r_photo").value = "";
+      document.getElementById("r_photo_preview").style.display = "none";
+    });
+    document.getElementById("r_getloc").addEventListener("click", () => {
+      const statusEl = document.getElementById("r_locstatus");
+      if (!navigator.geolocation) { statusEl.textContent = t('mapUnavailable'); return; }
+      statusEl.textContent = t('locating');
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          capturedLat = pos.coords.latitude;
+          capturedLng = pos.coords.longitude;
+          statusEl.textContent = `📍 ${capturedLat.toFixed(4)}, ${capturedLng.toFixed(4)}`;
+        },
+        () => { statusEl.textContent = t('locationDenied'); },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+    document.getElementById("regForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (document.getElementById("r_hp").value) { return; } // honeypot triggered, silently ignore
+      const lastSubmit = parseInt(localStorage.getItem("lastSubmitTime") || "0", 10);
+      if (Date.now() - lastSubmit < 30000) {
+        const errBox = document.getElementById("r_error");
+        errBox.style.display = "block";
+        errBox.textContent = lang === "te" ? "దయచేసి కొన్ని సెకన్లు ఆగి మళ్ళీ try చేయండి." : "Please wait a moment before submitting again.";
+        return;
+      }
+      const name = document.getElementById("r_name").value;
+      const age = document.getElementById("r_age").value;
+      const loc = document.getElementById("r_location").value;
+      const errBox = document.getElementById("r_error");
+      if (!name || !age || !loc) {
+        errBox.style.display = "block";
+        errBox.textContent = t('regRequired');
+        return;
+      }
+      const btn = document.getElementById("r_submit");
+      btn.disabled = true; btn.textContent = t('submitting');
+      try {
+        let photo_url = "";
+        const photoFile = document.getElementById("r_photo").files[0];
+        if (photoFile) {
+          btn.textContent = t('uploadingPhoto');
+          photo_url = await uploadPhoto(photoFile);
+          btn.textContent = t('submitting');
+        }
+        const payload = {
+          name, age, gender: document.getElementById("r_gender").value,
+          description: document.getElementById("r_desc").value,
+          last_seen_location: loc,
+          district: document.getElementById("r_district").value,
+          state: document.getElementById("r_state").value,
+          last_seen_datetime: document.getElementById("r_datetime").value,
+          contact_name: document.getElementById("r_contact_name").value,
+          fir_number: document.getElementById("r_fir").value,
+          police_station: document.getElementById("r_police_station").value,
+          police_contact: document.getElementById("r_police_contact").value,
+          reporter_phone: document.getElementById("r_phone").value,
+          photo_url,
+        };
+        if (capturedLat !== null && capturedLng !== null) {
+          payload.last_seen_lat = capturedLat;
+          payload.last_seen_lng = capturedLng;
+        }
+        await submitMissingPersonRegistration(payload);
+        localStorage.setItem("lastSubmitTime", String(Date.now()));
+        el.innerHTML = `<div class="success"><div class="icon">✅</div><h2>${t('regSuccess')}</h2><p style="color:var(--slate);font-size:13.5px;">${t('regSuccessSub')}</p></div>`;
+        setTimeout(() => location.hash = "#home", 1800);
+      } catch (err) {
+        console.error(err);
+        errBox.style.display = "block";
+        errBox.textContent = t('errorGeneric');
+        btn.disabled = false; btn.textContent = t('submitReg');
+      }
+    });
+  }
+
+  function renderSighting() {
+    el.innerHTML = `
+      <header>
+        ${langToggleHtml()}
+        <div class="eyebrow">${t('sightEyebrow')}</div>
+        <h1>${t('sightTitle')}</h1>
+        <p>${t('sightSub')}</p>
+      </header>
+      <form id="sightForm">
+        <div class="group-title">${t('sightLocationTitle')}</div>
+        <div class="field"><label>${t('location')}</label><input id="s_location" placeholder="${t('landmarkPh')}"></div>
+        <div class="field"><label>${t('notesLabel')}</label><textarea id="s_notes"></textarea></div>
+        <div class="field"><label>${t('yourPhone')}</label><input id="s_phone" placeholder="${t('phonePh')}"></div>
+        <input type="text" id="s_hp" name="website" style="position:absolute;left:-9999px;top:-9999px;" tabindex="-1" autocomplete="off">
+        <div id="s_error" class="error-msg" style="display:none;"></div>
+        <button type="submit" class="submit-btn" id="s_submit">${t('submitSight')}</button>
+      </form>
+    `;
+    attachLangToggle();
+    document.getElementById("sightForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (document.getElementById("s_hp").value) { return; } // honeypot triggered, silently ignore
+      const lastSubmit = parseInt(localStorage.getItem("lastSubmitTime") || "0", 10);
+      if (Date.now() - lastSubmit < 30000) {
+        const errBox = document.getElementById("s_error");
+        errBox.style.display = "block";
+        errBox.textContent = lang === "te" ? "దయచేసి కొన్ని సెకన్లు ఆగి మళ్ళీ try చేయండి." : "Please wait a moment before submitting again.";
+        return;
+      }
+      const location_ = document.getElementById("s_location").value;
+      const errBox = document.getElementById("s_error");
+      if (!location_) {
+        errBox.style.display = "block";
+        errBox.textContent = t('sightRequired');
+        return;
+      }
+      const btn = document.getElementById("s_submit");
+      btn.disabled = true; btn.textContent = t('submitting');
+      try {
+        await submitSightingReport({
+          location: location_,
+          notes: document.getElementById("s_notes").value,
+          reporter_phone: document.getElementById("s_phone").value,
+        });
+        localStorage.setItem("lastSubmitTime", String(Date.now()));
+        el.innerHTML = `<div class="success"><div class="icon">✅</div><h2>${t('sightSuccess')}</h2><p style="color:var(--slate);font-size:13.5px;">${t('sightSuccessSub')}</p></div>`;
+        setTimeout(() => location.hash = "#home", 1800);
+      } catch (err) {
+        console.error(err);
+        errBox.style.display = "block";
+        errBox.textContent = t('errorGeneric');
+        btn.disabled = false; btn.textContent = t('submitSight');
+      }
+    });
+  }
+
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  async function renderNearby() {
+    el.innerHTML = `
+      <header>${langToggleHtml()}<div class="eyebrow">${t('nearbyEyebrow')}</div><h1>${t('nearbyTitle')}</h1></header>
+      <div style="display:flex;gap:8px;padding:14px 20px 6px;overflow-x:auto;" id="radiusChips"></div>
+      <div class="section" id="nearList"><div class="loading">${t('loading')}</div></div>
+      ${bottomNav("nearby")}
+    `;
+    attachLangToggle();
+    let userLat = null, userLng = null, radius = "all";
+
+    function renderChips() {
+      const opts = [["2","2km"],["5","5km"],["10","10km"],["25","25km"],["all",t('allCases')]];
+      document.getElementById("radiusChips").innerHTML = opts.map(([val,label]) => `
+        <div data-radius="${val}" style="flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:12.5px;cursor:pointer;border:1px solid var(--line);${radius===val ? 'background:var(--teal);color:var(--white);border-color:var(--teal);' : 'background:var(--white);color:var(--slate);'}">${label}</div>
+      `).join('');
+      document.querySelectorAll("[data-radius]").forEach(chip => chip.addEventListener("click", () => {
+        radius = chip.dataset.radius;
+        renderChips();
+        renderList();
+      }));
+    }
+
+    let allCases = [];
+    function renderList() {
+      const list = document.getElementById("nearList");
+      let cases = allCases;
+      if (userLat !== null && radius !== "all") {
+        const r = parseFloat(radius);
+        cases = cases.filter(c => {
+          if (c.last_seen_lat == null || c.last_seen_lng == null) return false;
+          return haversineKm(userLat, userLng, c.last_seen_lat, c.last_seen_lng) <= r;
+        });
+      }
+      if (userLat !== null) {
+        cases = [...cases].sort((a, b) => {
+          const da = (a.last_seen_lat != null) ? haversineKm(userLat, userLng, a.last_seen_lat, a.last_seen_lng) : Infinity;
+          const db = (b.last_seen_lat != null) ? haversineKm(userLat, userLng, b.last_seen_lat, b.last_seen_lng) : Infinity;
+          return da - db;
+        });
+      }
+      if (cases.length === 0) {
+        list.innerHTML = `<div style="font-size:13px;color:var(--slate);">${t('noNearby')}</div>`;
+        return;
+      }
+      list.innerHTML = cases.map(c => {
+        const mapHtml = (c.last_seen_lat && c.last_seen_lng) ? `
+          <iframe
+            style="width:100%;height:140px;border:none;border-radius:8px;margin-top:10px;"
+            loading="lazy"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${c.last_seen_lng-0.01}%2C${c.last_seen_lat-0.01}%2C${c.last_seen_lng+0.01}%2C${c.last_seen_lat+0.01}&layer=mapnik&marker=${c.last_seen_lat}%2C${c.last_seen_lng}">
+          </iframe>` : '';
+        let distText = '';
+        if (userLat !== null && c.last_seen_lat != null) {
+          distText = ` • ${haversineKm(userLat, userLng, c.last_seen_lat, c.last_seen_lng).toFixed(1)} ${t('distanceAway')}`;
+        }
+        const contactHtml = (c.police_station || c.police_contact) ? `
+          <div style="font-size:11px;color:var(--slate);margin-top:6px;">
+            ${c.police_station ? `🏢 ${c.police_station}` : ''}
+            ${c.police_contact ? ` • <a href="tel:${c.police_contact}" style="color:var(--teal);">${c.police_contact}</a>` : ''}
+          </div>` : '';
+        return `
+        <div class="row-card">
+          <div style="display:flex;gap:12px;">
+            <div class="ph" style="${c.photo_url ? `background-image:url('${c.photo_url}');background-size:cover;background-position:center;cursor:zoom-in;` : ''}" ${c.photo_url ? `onclick="window.open('${c.photo_url}','_blank')"` : ''}></div>
+            <div style="flex:1;">
+              <h4>${c.name}, ${c.age}</h4>
+              <div class="meta">${c.last_seen_location||''}${distText} ${c.case_id ? `• ${c.case_id}` : ''}</div>
+              ${contactHtml}
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                <button class="btn-approve" onclick="location.hash='#sighting'">${t('iSawThem')}</button>
+                <button class="btn-approve" style="background:var(--teal);border-color:var(--teal);" onclick="location.hash='#found/${c.id}'">${t('reportFound')}</button>
+              </div>
+            </div>
+          </div>
+          ${mapHtml}
+        </div>`;
+      }).join('');
+    }
+
+    renderChips();
+    try {
+      allCases = await getApprovedCases();
+      renderList();
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; renderList(); },
+          () => { /* permission denied, fall back to unsorted full list */ }
+        );
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  function computeMatchScore(c, criteria) {
+    let score = 0;
+    if (criteria.age && c.age) {
+      const diff = Math.abs(parseInt(c.age, 10) - parseInt(criteria.age, 10));
+      if (!isNaN(diff)) { if (diff <= 2) score += 3; else if (diff <= 5) score += 1; }
+    }
+    if (criteria.gender && c.gender && criteria.gender === c.gender) score += 2;
+    if (criteria.location) {
+      const words = criteria.location.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const target = (c.last_seen_location || "").toLowerCase();
+      if (words.some(w => target.includes(w))) score += 3;
+    }
+    return score;
+  }
+
+  function renderFoundReport(caseId) {
+    let selectedCaseId = (caseId && caseId !== "none") ? caseId : null;
+    let allVerifiedCases = [];
+    el.innerHTML = `
+      <header>
+        ${langToggleHtml()}
+        <div class="eyebrow">${t('foundEyebrow')}</div>
+        <h1>${t('foundTitle')}</h1>
+        <p>${t('foundSub')}</p>
+      </header>
+      <form id="foundForm">
+        <div class="field">
+          <label>${t('photoLabel')}</label>
+          <input type="file" id="f_photo" accept="image/*" capture="environment" style="border:2px dashed var(--line);padding:20px 10px;background:#FBF9F4;">
+          <div id="f_photo_preview" style="display:none;margin-top:10px;position:relative;width:110px;">
+            <img id="f_photo_img" style="width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--line);">
+            <span id="f_photo_clear" style="position:absolute;top:-8px;right:-8px;background:var(--red);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;">✕</span>
+          </div>
+          <small style="color:var(--slate);font-size:11px;">${t('photoHint')}</small>
+        </div>
+        <div class="field"><label>${t('foundLocationLabel')}</label><input id="f_location" placeholder="${t('locationPh')}"></div>
+        <div class="field"><label>${t('foundDatetimeLabel')}</label><input id="f_datetime" type="datetime-local"></div>
+        <div class="row2">
+          <div class="field"><label>${t('approxAge')}</label><input id="f_age" type="number"></div>
+          <div class="field"><label>${t('approxGender')}</label><select id="f_gender"><option value="">${t('selectGender')}</option><option>${t('male')}</option><option>${t('female')}</option></select></div>
+        </div>
+        <div class="field"><label>${t('notesLabel')}</label><textarea id="f_notes"></textarea></div>
+        <div id="matchBox"></div>
+        <div class="field"><label>${t('yourPhone')}</label><input id="f_phone" placeholder="${t('phonePh')}"></div>
+        <input type="text" id="f_hp" name="website" style="position:absolute;left:-9999px;top:-9999px;" tabindex="-1" autocomplete="off">
+        <div id="f_error" class="error-msg" style="display:none;"></div>
+        <button type="submit" class="submit-btn" id="f_submit">${t('submitFound')}</button>
+      </form>
+    `;
+    attachLangToggle();
+
+    function renderMatches() {
+      const age = document.getElementById("f_age").value;
+      const gender = document.getElementById("f_gender").value;
+      const locationText = document.getElementById("f_location").value;
+      const box = document.getElementById("matchBox");
+      if (!age && !gender && !locationText) { box.innerHTML = ""; return; }
+      const scored = allVerifiedCases
+        .map(c => ({ c, score: computeMatchScore(c, { age, gender, location: locationText }) }))
+        .filter(x => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+      if (scored.length === 0) {
+        box.innerHTML = `<div style="font-size:12px;color:var(--slate);margin-bottom:14px;">${t('matchNone')}</div>`;
+        return;
+      }
+      box.innerHTML = `
+        <div style="background:#FBF9F4;border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:4px;">${t('matchTitle')}</div>
+          <div style="font-size:11px;color:var(--slate);margin-bottom:8px;">${t('matchHint')}</div>
+          ${scored.map(({c}) => `
+            <div class="match-item" data-select-match="${c.id}" style="display:flex;gap:10px;align-items:center;padding:8px;border-radius:6px;cursor:pointer;background:${selectedCaseId===c.id?'#E4EEE6':'var(--white)'};border:1px solid ${selectedCaseId===c.id?'var(--green)':'var(--line)'};margin-bottom:6px;">
+              <div class="ph" style="width:36px;height:36px;${c.photo_url ? `background-image:url('${c.photo_url}');background-size:cover;background-position:center;` : ''}"></div>
+              <div style="flex:1;font-size:12px;">${c.name}, ${c.age} • ${c.last_seen_location||''} ${selectedCaseId===c.id ? `<b style="color:var(--green);">✓ ${t('linkedCase')}</b>` : ''}</div>
+            </div>`).join('')}
+        </div>`;
+      box.querySelectorAll("[data-select-match]").forEach(item => item.addEventListener("click", () => {
+        selectedCaseId = (selectedCaseId === item.dataset.selectMatch) ? null : item.dataset.selectMatch;
+        renderMatches();
+      }));
+    }
+
+    document.getElementById("f_photo").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      const preview = document.getElementById("f_photo_preview");
+      if (file) {
+        document.getElementById("f_photo_img").src = URL.createObjectURL(file);
+        preview.style.display = "block";
+      } else {
+        preview.style.display = "none";
+      }
+    });
+    document.getElementById("f_photo_clear").addEventListener("click", () => {
+      document.getElementById("f_photo").value = "";
+      document.getElementById("f_photo_preview").style.display = "none";
+    });
+    getApprovedCases().then(cases => { allVerifiedCases = cases; renderMatches(); }).catch(console.error);
+    ["f_age","f_gender","f_location"].forEach(id => document.getElementById(id).addEventListener("input", renderMatches));
+
+    document.getElementById("foundForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (document.getElementById("f_hp").value) { return; }
+      const errBox = document.getElementById("f_error");
+      const photoFile = document.getElementById("f_photo").files[0];
+      if (!photoFile) {
+        errBox.style.display = "block";
+        errBox.textContent = t('foundPhotoRequired');
+        return;
+      }
+      const lastSubmit = parseInt(localStorage.getItem("lastSubmitTime") || "0", 10);
+      if (Date.now() - lastSubmit < 30000) {
+        errBox.style.display = "block";
+        errBox.textContent = lang === "te" ? "దయచేసి కొన్ని సెకన్లు ఆగి మళ్ళీ try చేయండి." : "Please wait a moment before submitting again.";
+        return;
+      }
+      const btn = document.getElementById("f_submit");
+      btn.disabled = true; btn.textContent = t('uploadingPhoto');
+      try {
+        const photo_url = await uploadPhoto(photoFile);
+        btn.textContent = t('submitting');
+        await submitFoundReport({
+          case_id: selectedCaseId || "",
+          location: document.getElementById("f_location").value || "-",
+          found_datetime: document.getElementById("f_datetime").value,
+          approx_age: document.getElementById("f_age").value,
+          approx_gender: document.getElementById("f_gender").value,
+          notes: document.getElementById("f_notes").value,
+          reporter_phone: document.getElementById("f_phone").value,
+          photo_url,
+        });
+        localStorage.setItem("lastSubmitTime", String(Date.now()));
+        el.innerHTML = `<div class="success"><div class="icon">✅</div><h2>${t('foundSuccess')}</h2><p style="color:var(--slate);font-size:13.5px;">${t('foundSuccessSub')}</p></div>`;
+        setTimeout(() => location.hash = "#home", 1800);
+      } catch (err) {
+        console.error(err);
+        errBox.style.display = "block";
+        errBox.textContent = t('errorGeneric');
+        btn.disabled = false; btn.textContent = t('submitFound');
+      }
+    });
+  }
+
+  async function renderAdmin() {
+    if (currentUser === undefined) {
+      el.innerHTML = `<div class="loading">${t('loading')}</div>`;
+      return;
+    }
+    if (!currentUser) {
+      el.innerHTML = `
+        <header style="padding:16px 20px;">${langToggleHtml()}</header>
+        <div class="section">
+          <h2>${t('adminLogin')}</h2>
+          <form id="loginForm">
+            <div class="field"><label>${t('email')}</label><input id="a_email" type="email"></div>
+            <div class="field">
+              <label>${t('password')}</label>
+              <div style="position:relative;">
+                <input id="a_pw" type="password" style="padding-right:44px;">
+                <span id="a_pw_toggle" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;user-select:none;">👁️</span>
+              </div>
+            </div>
+            <div id="a_error" class="error-msg" style="display:none;"></div>
+            <button type="submit" class="submit-btn">${t('login')}</button>
+          </form>
+        </div>
+        ${bottomNav("admin")}
+      `;
+      attachLangToggle();
+      document.getElementById("a_pw_toggle").addEventListener("click", () => {
+        const pwInput = document.getElementById("a_pw");
+        const toggle = document.getElementById("a_pw_toggle");
+        if (pwInput.type === "password") { pwInput.type = "text"; toggle.textContent = "🙈"; }
+        else { pwInput.type = "password"; toggle.textContent = "👁️"; }
+      });
+      document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("a_email").value;
+        const pw = document.getElementById("a_pw").value;
+        const errBox = document.getElementById("a_error");
+        try {
+          await signInWithEmailAndPassword(auth, email, pw);
+          render();
+        } catch (err) {
+          errBox.style.display = "block";
+          errBox.textContent = t('loginFailed');
+        }
+      });
+      return;
+    }
+
+    let adminTab = "queue";
+    el.innerHTML = `
+      <div class="admin-header">
+        <div><div style="font-weight:700;font-size:15px;">${t('verifyConsole')}</div><div style="font-size:11.5px;opacity:.7;">${currentUser.email}</div></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;background:rgba(255,255,255,.15);border-radius:16px;overflow:hidden;font-size:11px;">
+            <span style="padding:5px 10px;cursor:pointer;${lang==='en'?'background:rgba(255,255,255,.35);font-weight:700;':''}" data-lang="en">EN</span>
+            <span style="padding:5px 10px;cursor:pointer;${lang==='te'?'background:rgba(255,255,255,.35);font-weight:700;':''}" data-lang="te">తె</span>
+            <span style="padding:5px 10px;cursor:pointer;${lang==='hi'?'background:rgba(255,255,255,.35);font-weight:700;':''}" data-lang="hi">हि</span>
+          </div>
+          <button class="logout-btn" id="logoutBtn">${t('logout')}</button>
+        </div>
+      </div>
+      <div style="display:flex;border-bottom:1px solid var(--line);">
+        <div class="admin-tab" data-tab="queue" style="flex:1;text-align:center;padding:11px 0;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--teal);border-bottom:2px solid var(--teal);">${t('queueTab')}</div>
+        <div class="admin-tab" data-tab="history" style="flex:1;text-align:center;padding:11px 0;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--slate);border-bottom:2px solid transparent;">${t('history')}</div>
+        <div class="admin-tab" data-tab="profile" style="flex:1;text-align:center;padding:11px 0;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--slate);border-bottom:2px solid transparent;">${t('profile')}</div>
+      </div>
+      <div class="section" id="adminContent"><div class="loading">${t('loading')}</div></div>
+      ${bottomNav("admin")}
+    `;
+    attachLangToggle();
+    document.getElementById("logoutBtn").addEventListener("click", async () => { await signOut(auth); render(); });
+
+    function setActiveTab(tabName) {
+      adminTab = tabName;
+      document.querySelectorAll(".admin-tab").forEach(t => {
+        const active = t.dataset.tab === tabName;
+        t.style.color = active ? "var(--teal)" : "var(--slate)";
+        t.style.borderBottom = active ? "2px solid var(--teal)" : "2px solid transparent";
+      });
+      if (tabName === "queue") renderQueueTab();
+      else if (tabName === "history") renderHistoryTab();
+      else if (tabName === "profile") renderProfileTab();
+    }
+    document.querySelectorAll(".admin-tab").forEach(el2 => el2.addEventListener("click", () => setActiveTab(el2.dataset.tab)));
+
+    async function renderQueueTab() {
+      const content = document.getElementById("adminContent");
+      content.innerHTML = `<div class="loading">${t('loading')}</div>`;
+      try {
+        const { cases, sightings, foundReports } = await getPendingQueue();
+        const verifiedCases = await getVerifiedCasesForAdmin();
+        content.innerHTML = `
+          <div style="font-size:13.5px;margin-bottom:10px;">${t('pendingReg')} (${cases.length})</div>
+          ${cases.length === 0 ? `<div style="font-size:12.5px;color:var(--slate);">${t('noPending')}</div>` :
+            cases.map(r => `
+              <div class="row-card" style="display:flex;gap:12px;">
+                <div class="ph" style="${r.photo_url ? `background-image:url('${r.photo_url}');background-size:cover;background-position:center;cursor:zoom-in;` : ''}" ${r.photo_url ? `onclick="window.open('${r.photo_url}','_blank')"` : ''}></div>
+                <div style="flex:1;">
+                  <h4>${r.name}, ${r.age} ${r.status === 'under_verification' ? `<span style="font-size:10px;background:#FCEFE4;color:var(--amber);padding:2px 6px;border-radius:4px;">${t('underVerification')}</span>` : ''}</h4>
+                  <div class="meta">${r.last_seen_location||''} • FIR: ${r.fir_number || t('firNone')} ${r.case_id ? `• ${r.case_id}` : ''}</div>
+                  <div class="actions">
+                    ${r.status === 'pending' ? `<button class="btn-reject" data-review-case="${r.id}" style="border-color:var(--amber);color:var(--amber);">${t('markUnderReview')}</button>` : ''}
+                    <button class="btn-approve" data-approve-case="${r.id}">${t('approve')}</button>
+                    <button class="btn-reject" data-reject-case="${r.id}">${t('reject')}</button>
+                  </div>
+                </div>
+              </div>`).join('')}
+          <div style="font-size:13.5px;margin:20px 0 10px;">${t('pendingSight')} (${sightings.length})</div>
+          ${sightings.length === 0 ? `<div style="font-size:12.5px;color:var(--slate);">${t('noPending')}</div>` :
+            sightings.map(r => `
+              <div class="row-card">
+                <h4>Sighting @ ${r.location||''}</h4>
+                <div class="meta">${r.notes||''}</div>
+                <div class="actions">
+                  <button class="btn-approve" data-approve-sighting="${r.id}">${t('approve')}</button>
+                  <button class="btn-reject" data-reject-sighting="${r.id}">${t('reject')}</button>
+                </div>
+              </div>`).join('')}
+          <div style="font-size:13.5px;margin:20px 0 10px;">${t('pendingFound')} (${foundReports.length})</div>
+          ${foundReports.length === 0 ? `<div style="font-size:12.5px;color:var(--slate);">${t('noPending')}</div>` :
+            foundReports.map(r => `
+              <div class="row-card" style="display:flex;gap:12px;">
+                <div class="ph" style="${r.photo_url ? `background-image:url('${r.photo_url}');background-size:cover;background-position:center;cursor:zoom-in;` : ''}" ${r.photo_url ? `onclick="window.open('${r.photo_url}','_blank')"` : ''}></div>
+                <div style="flex:1;">
+                  <h4>✅ ${t('reportFound')} ${r.case_id ? `<span style="font-size:10px;background:#E4EEE6;color:var(--green);padding:2px 6px;border-radius:4px;">${t('linkedCase')}: ${r.case_id}</span>` : ''}</h4>
+                  <div class="meta">${r.location && r.location !== '-' ? r.location : ''} ${r.approx_age ? `• ${t('approxAge')}: ${r.approx_age}` : ''} ${r.approx_gender ? `• ${r.approx_gender}` : ''}</div>
+                  <div class="meta">${r.notes||''}</div>
+                  <div class="actions">
+                    <button class="btn-approve" data-approve-found="${r.id}" data-found-case="${r.case_id||''}">${t('approve')}</button>
+                    <button class="btn-reject" data-reject-found="${r.id}">${t('reject')}</button>
+                  </div>
+                </div>
+              </div>`).join('')}
+          <div style="font-size:13.5px;margin:20px 0 10px;">${t('verifiedManage')} (${verifiedCases.length})</div>
+          ${verifiedCases.length === 0 ? `<div style="font-size:12.5px;color:var(--slate);">${t('noPending')}</div>` :
+            verifiedCases.map(r => `
+              <div class="row-card" style="display:flex;gap:12px;">
+                <div class="ph" style="${r.photo_url ? `background-image:url('${r.photo_url}');background-size:cover;background-position:center;cursor:zoom-in;` : ''}" ${r.photo_url ? `onclick="window.open('${r.photo_url}','_blank')"` : ''}></div>
+                <div style="flex:1;">
+                  <h4>${r.name}, ${r.age} <span style="font-size:10px;background:#E4EEE6;color:var(--green);padding:2px 6px;border-radius:4px;">${t('statusVerified')}</span></h4>
+                  <div class="meta">${r.last_seen_location||''} ${r.case_id ? `• ${r.case_id}` : ''}</div>
+                  <div class="actions">
+                    <button class="btn-reject" data-close-case="${r.id}">${t('closeCase')}</button>
+                  </div>
+                </div>
+              </div>`).join('')}
+        `;
+        content.querySelectorAll("[data-approve-case]").forEach(b => b.addEventListener("click", async () => { await approveCase(b.dataset.approveCase); renderQueueTab(); }));
+        content.querySelectorAll("[data-reject-case]").forEach(b => b.addEventListener("click", async () => { await rejectCase(b.dataset.rejectCase); renderQueueTab(); }));
+        content.querySelectorAll("[data-review-case]").forEach(b => b.addEventListener("click", async () => { await markUnderVerification(b.dataset.reviewCase); renderQueueTab(); }));
+        content.querySelectorAll("[data-close-case]").forEach(b => b.addEventListener("click", async () => { await closeCase(b.dataset.closeCase); renderQueueTab(); }));
+        content.querySelectorAll("[data-approve-sighting]").forEach(b => b.addEventListener("click", async () => { await approveSighting(b.dataset.approveSighting); renderQueueTab(); }));
+        content.querySelectorAll("[data-reject-sighting]").forEach(b => b.addEventListener("click", async () => { await rejectSighting(b.dataset.rejectSighting); renderQueueTab(); }));
+        content.querySelectorAll("[data-approve-found]").forEach(b => b.addEventListener("click", async () => { await approveFound(b.dataset.approveFound, b.dataset.foundCase); renderQueueTab(); }));
+        content.querySelectorAll("[data-reject-found]").forEach(b => b.addEventListener("click", async () => { await rejectFound(b.dataset.rejectFound); renderQueueTab(); }));
+      } catch (e) {
+        console.error(e);
+        content.innerHTML = `<div style="background:#FDF2F0;border:1px solid var(--red);border-radius:8px;padding:14px;font-size:12.5px;color:var(--red);word-break:break-all;"><b>Error:</b> ${e.message || e}</div>`;
+      }
+    }
+
+    async function renderHistoryTab() {
+      const content = document.getElementById("adminContent");
+      content.innerHTML = `<div class="loading">${t('loading')}</div>`;
+      try {
+        const closed = await getClosedCases();
+        content.innerHTML = `
+          <div style="font-size:13.5px;margin-bottom:10px;">${t('closedCases')} (${closed.length})</div>
+          ${closed.length === 0 ? `<div style="font-size:12.5px;color:var(--slate);">${t('noClosedCases')}</div>` :
+            closed.map(r => `
+              <div class="row-card" style="display:flex;gap:12px;">
+                <div class="ph" style="${r.photo_url ? `background-image:url('${r.photo_url}');background-size:cover;background-position:center;cursor:zoom-in;` : ''}" ${r.photo_url ? `onclick="window.open('${r.photo_url}','_blank')"` : ''}></div>
+                <div style="flex:1;">
+                  <h4>${r.name}, ${r.age} <span style="font-size:10px;background:#EFE9E4;color:var(--slate);padding:2px 6px;border-radius:4px;">${t('statusClosed')}</span></h4>
+                  <div class="meta">${r.last_seen_location||''} ${r.case_id ? `• ${r.case_id}` : ''}</div>
+                </div>
+              </div>`).join('')}
+        `;
+      } catch (e) {
+        console.error(e);
+        content.innerHTML = `<div style="background:#FDF2F0;border:1px solid var(--red);border-radius:8px;padding:14px;font-size:12.5px;color:var(--red);word-break:break-all;"><b>Error:</b> ${e.message || e}</div>`;
+      }
+    }
+
+    async function renderProfileTab() {
+      const content = document.getElementById("adminContent");
+      content.innerHTML = `<div class="loading">${t('loading')}</div>`;
+      try {
+        const profile = await getAdminProfile(currentUser.uid);
+        content.innerHTML = `
+          <div style="font-size:13.5px;margin-bottom:10px;">${t('yourProfile')}</div>
+          <div class="row-card">
+            <div style="margin-bottom:8px;"><b>${t('adminName')}:</b> ${(profile && profile.name) || '-'}</div>
+            <div style="margin-bottom:8px;"><b>${t('email')}:</b> ${currentUser.email}</div>
+            <div><b>${t('adminRole')}:</b> ${(profile && profile.role) || 'admin'}</div>
+          </div>
+
+          <div style="font-size:13.5px;margin:22px 0 6px;">${t('addNewAdminTitle')}</div>
+          <div style="font-size:11.5px;color:var(--slate);margin-bottom:12px;">${t('addNewAdminSub')}</div>
+          <form id="addAdminForm" class="row-card">
+            <div class="field"><label>${t('newAdminName')}</label><input id="na_name" placeholder="${t('newAdminName')}"></div>
+            <div class="field"><label>${t('newAdminEmail')}</label><input id="na_email" type="email" placeholder="${t('newAdminEmail')}"></div>
+            <div class="field">
+              <label>${t('newAdminPassword')}</label>
+              <div style="position:relative;">
+                <input id="na_pw" type="password" style="padding-right:44px;">
+                <span id="na_pw_toggle" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;user-select:none;">👁️</span>
+              </div>
+            </div>
+            <div id="na_msg" style="font-size:12px;margin-bottom:10px;display:none;"></div>
+            <button type="submit" class="submit-btn" id="na_submit" style="margin-top:0;">${t('addAdminBtn')}</button>
+          </form>
+        `;
+        document.getElementById("na_pw_toggle").addEventListener("click", () => {
+          const pwInput = document.getElementById("na_pw");
+          const toggle = document.getElementById("na_pw_toggle");
+          if (pwInput.type === "password") { pwInput.type = "text"; toggle.textContent = "🙈"; }
+          else { pwInput.type = "password"; toggle.textContent = "👁️"; }
+        });
+        document.getElementById("addAdminForm").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.getElementById("na_name").value;
+          const email = document.getElementById("na_email").value;
+          const pw = document.getElementById("na_pw").value;
+          const msg = document.getElementById("na_msg");
+          const btn = document.getElementById("na_submit");
+          btn.disabled = true; btn.textContent = t('submitting');
+          try {
+            await addNewAdmin(email, pw, name);
+            msg.style.display = "block";
+            msg.style.color = "var(--green)";
+            msg.textContent = t('addAdminSuccess');
+            document.getElementById("addAdminForm").reset();
+          } catch (err) {
+            console.error(err);
+            msg.style.display = "block";
+            msg.style.color = "var(--red)";
+            msg.textContent = t('addAdminError');
+          }
+          btn.disabled = false; btn.textContent = t('addAdminBtn');
+        });
+      } catch (e) {
+        console.error(e);
+        content.innerHTML = `<div style="background:#FDF2F0;border:1px solid var(--red);border-radius:8px;padding:14px;font-size:12.5px;color:var(--red);word-break:break-all;"><b>Error:</b> ${e.message || e}</div>`;
+      }
+    }
+
+    renderQueueTab();
+  }
+
+  render();
+  setTimeout(() => { const s = document.getElementById("splash"); if (s) s.remove(); }, 2300);
+
+  // ---------- PWA: register service worker ----------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch((e) => console.error("SW registration failed:", e));
+    });
+  }
+</script>
+</body>
+</html>
